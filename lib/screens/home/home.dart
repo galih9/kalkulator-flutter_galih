@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:function_tree/function_tree.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kalkulator/screens/widgets/home_widgets.dart';
 import 'package:kalkulator/utils/logger.dart';
 
@@ -14,109 +13,11 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String dataToCount = "0";
   String result = "0";
-  final List<String> _list = [
-    "(",
-    ")",
-    "CE",
-    "Del",
-    "7",
-    "8",
-    "9",
-    "/",
-    "4",
-    "5",
-    "6",
-    "*",
-    "1",
-    "2",
-    "3",
-    "-",
-    "0",
-    ".",
-    "=",
-    "+",
-  ];
+  final List<String> _list = CalcUtils.getButtonLabels();
 
   @override
   void initState() {
     super.initState();
-  }
-
-  bool isNumericUsingRegularExpression(String string) {
-    final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
-    if (string == ".") {
-      return false;
-    }
-    if (string == "-") {
-      return false;
-    }
-
-    return numericRegex.hasMatch(string);
-  }
-
-  String removeLastCharacter(String string) {
-    if (string.length == 1) {
-      return "0";
-    }
-    return string.substring(0, string.length - 1);
-  }
-
-  bool checkIfLastCharacterIsRoundable(String string) {
-    if (string.length == 1) {
-      return false;
-    }
-    if (string.substring(string.length - 2, string.length) == "00") {
-      return true;
-    }
-    return false;
-  }
-
-  bool checkIfLastCharacterIsOperator(String string) {
-    if (string.length == 1) {
-      return false;
-    }
-    if (string.substring(string.length - 1, string.length) == ".") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "-") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "+") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "/") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "*") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "^") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == ")") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "(") {
-      return true;
-    }
-    return false;
-  }
-
-  void showSnackbar(context, String message) {
-    final snackBar = SnackBar(
-      duration: const Duration(seconds: 1),
-      content: Text(
-        message,
-      ),
-      action: SnackBarAction(
-        label: 'Okay',
-        onPressed: () {
-          // Some code to undo the change.
-        },
-      ),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -157,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     CalculatorButtons(
                       btnStyle: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
-                          ((isNumericUsingRegularExpression(i))
+                          ((CalcUtils.isNumericUsingRegularExpression(i))
                               ? Colors.blueGrey
                               : (i == "=")
                                   ? Colors.blue
@@ -170,36 +71,41 @@ class _MyHomePageState extends State<MyHomePage> {
                         setState(
                           () {
                             if (dataToCount == "0") {
-                              if (isNumericUsingRegularExpression(i)) {
+                              if (CalcUtils.isNumericUsingRegularExpression(
+                                  i)) {
                                 dataToCount = i;
                               } else {
                                 CustomLogger.warning(
                                   "angka di harus awal, gak boleh operator",
                                 );
-                                showSnackbar(
+                                CalcUtils.showSnackbar(
                                   context,
                                   "dont put operators as the first character!",
                                 );
                               }
                             } else if (i == "Del") {
-                              dataToCount = removeLastCharacter(dataToCount);
+                              dataToCount =
+                                  CalcUtils.removeLastCharacter(dataToCount);
                             } else if (i == "CE") {
                               dataToCount = "0";
                             } else if (i == "=") {
-                              if (checkIfLastCharacterIsOperator(dataToCount)) {
+                              if (CalcUtils.checkIfLastCharacterIsOperator(
+                                  dataToCount)) {
                                 CustomLogger.warning(
                                   "operator di akhir itu invalid",
                                 );
-                                showSnackbar(
+                                CalcUtils.showSnackbar(
                                   context,
                                   "dont put operators as the last character!",
                                 );
                               } else {
                                 String temp =
                                     dataToCount.interpret().toStringAsFixed(2);
-                                result = (checkIfLastCharacterIsRoundable(temp))
-                                    ? temp.substring(0, temp.length - 3)
-                                    : temp;
+                                result =
+                                    (CalcUtils.checkIfLastCharacterIsRoundable(
+                                            temp))
+                                        ? temp.substring(0, temp.length - 3)
+                                        : temp;
                                 CustomLogger.info("get result $result");
                               }
                             } else {
