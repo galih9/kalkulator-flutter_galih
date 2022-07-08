@@ -19,6 +19,7 @@ dependencies:
   json_annotation: ^4.5.0
   json_serializable: ^6.2.0
   logger: ^1.1.0
+  msix: ^3.6.2
   sizer: ^2.0.15
 
 dev_dependencies:
