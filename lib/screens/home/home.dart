@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:function_tree/function_tree.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kalkulator/screens/home/web/web_view.dart';
+import 'package:kalkulator/screens/home/windows/win_views.dart';
 import 'package:kalkulator/screens/widgets/home_widgets.dart';
 import 'package:kalkulator/utils/logger.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
+import 'package:sizer/sizer.dart';
+
+part './mobile/mobile_view.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -12,152 +19,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String dataToCount = "0";
-  String result = "0";
-  final List<String> _list = [
-    "(",
-    ")",
-    "CE",
-    "Del",
-    "7",
-    "8",
-    "9",
-    "/",
-    "4",
-    "5",
-    "6",
-    "*",
-    "1",
-    "2",
-    "3",
-    "-",
-    "0",
-    ".",
-    "=",
-    "+",
-  ];
+  String _dataToCount = "0";
+  String _result = "0";
+  final List<String> _list = CalcUtils.getButtonLabels();
+  final List<String> _listLandscape = CalcUtils.getButtonLandscapeLabels();
 
   @override
   void initState() {
     super.initState();
   }
 
-  bool isNumericUsingRegularExpression(String string) {
-    final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
-    if (string == ".") {
-      return false;
-    }
-    if (string == "-") {
-      return false;
-    }
-
-    return numericRegex.hasMatch(string);
-  }
-
-  String removeLastCharacter(String string) {
-    if (string.length == 1) {
-      return "0";
-    }
-    return string.substring(0, string.length - 1);
-  }
-
-  bool checkIfLastCharacterIsRoundable(String string) {
-    if (string.length == 1) {
-      return false;
-    }
-    if (string.substring(string.length - 2, string.length) == "00") {
-      return true;
-    }
-    return false;
-  }
-
-  bool checkIfLastCharacterIsOperator(String string) {
-    if (string.length == 1) {
-      return false;
-    }
-    if (string.substring(string.length - 1, string.length) == ".") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "-") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "+") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "/") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "*") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "^") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == ")") {
-      return true;
-    }
-    if (string.substring(string.length - 1, string.length) == "(") {
-      return true;
-    }
-    return false;
-  }
-
-  void showSnackbar(context, String message) {
-    final snackBar = SnackBar(
-      duration: const Duration(seconds: 1),
-      content: Text(
-        message,
-      ),
-      action: SnackBarAction(
-        label: 'Okay',
-        onPressed: () {
-          // Some code to undo the change.
-        },
-      ),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Flutter Demo Home Page'),
-      // ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          HeaderDisplayer(
-            value: result,
-            color: Colors.amberAccent,
-            colorLabel: Colors.amber,
-            label: "result",
-          ),
-          HeaderDisplayer(
-            value: dataToCount,
-            color: Colors.greenAccent,
-            colorLabel: Colors.green,
-            label: "value",
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Center(
-              child: GridView(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 4,
-                  crossAxisSpacing: 4,
-                ),
-                children: [
-                  for (var i in _list)
-                    CalculatorButtons(
+    if (kIsWeb) {
+      return Scaffold(
+        body: LayoutBuilder(builder: (context, constraint) {
+          return WebViewCalc(
+            result: _result,
+            dataCount: _dataToCount,
+            constraints: constraint,
+            buttons: GridView(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+              ),
+              children: [
+                for (var i in _listLandscape)
+                  Container(
+                    margin: EdgeInsets.all(1.h),
+                    child: CalculatorButtons(
                       btnStyle: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
-                          ((isNumericUsingRegularExpression(i))
+                          ((CalcUtils.isNumericUsingRegularExpression(i))
                               ? Colors.blueGrey
                               : (i == "=")
                                   ? Colors.blue
@@ -165,56 +64,315 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       label: i,
+                      fontSize: (constraint.maxWidth > 600) ? 3.sp : 12.sp,
                       onPressed: () {
                         CustomLogger.verboose(i);
                         setState(
                           () {
-                            if (dataToCount == "0") {
-                              if (isNumericUsingRegularExpression(i)) {
-                                dataToCount = i;
+                            if (_dataToCount == "0") {
+                              if (CalcUtils.isNumericUsingRegularExpression(
+                                  i)) {
+                                _dataToCount = i;
                               } else {
                                 CustomLogger.warning(
                                   "angka di harus awal, gak boleh operator",
                                 );
-                                showSnackbar(
+                                CalcUtils.showSnackbar(
                                   context,
                                   "dont put operators as the first character!",
                                 );
                               }
                             } else if (i == "Del") {
-                              dataToCount = removeLastCharacter(dataToCount);
+                              _dataToCount =
+                                  CalcUtils.removeLastCharacter(_dataToCount);
                             } else if (i == "CE") {
-                              dataToCount = "0";
+                              _dataToCount = "0";
+                              _result = "0";
                             } else if (i == "=") {
-                              if (checkIfLastCharacterIsOperator(dataToCount)) {
+                              if (CalcUtils.checkIfLastCharacterIsOperator(
+                                  _dataToCount)) {
                                 CustomLogger.warning(
                                   "operator di akhir itu invalid",
                                 );
-                                showSnackbar(
+                                CalcUtils.showSnackbar(
                                   context,
                                   "dont put operators as the last character!",
                                 );
                               } else {
                                 String temp =
-                                    dataToCount.interpret().toStringAsFixed(2);
-                                result = (checkIfLastCharacterIsRoundable(temp))
-                                    ? temp.substring(0, temp.length - 3)
-                                    : temp;
-                                CustomLogger.info("get result $result");
+                                    _dataToCount.interpret().toStringAsFixed(2);
+                                _result =
+                                    (CalcUtils.checkIfLastCharacterIsRoundable(
+                                            temp))
+                                        ? temp.substring(0, temp.length - 3)
+                                        : temp;
+                                CustomLogger.info("get result $_result");
                               }
                             } else {
-                              dataToCount += i;
+                              _dataToCount += i;
                             }
                           },
                         );
                       },
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
+        }),
+      );
+    } else if (Platform.isAndroid) {
+      return OrientationBuilder(
+        builder: (context, orientation) {
+          if (orientation == Orientation.portrait) {
+            SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.manual,
+              overlays: SystemUiOverlay.values,
+            ); // to re-show bars
+          } else {
+            SystemChrome.setEnabledSystemUIMode(
+              SystemUiMode.manual,
+              overlays: [
+                SystemUiOverlay.top,
+                SystemUiOverlay.bottom,
+              ],
+            );
+          }
+          return MobileViewCalc(
+            orientation: orientation,
+            result: _result,
+            dataCount: _dataToCount,
+            buttons: GridView(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: (orientation == Orientation.portrait) ? 4 : 5,
+                mainAxisSpacing: 4,
+                crossAxisSpacing: 4,
+              ),
+              children: [
+                if (orientation == Orientation.landscape)
+                  for (var i in _listLandscape)
+                    CalculatorButtons(
+                      btnStyle: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          ((CalcUtils.isNumericUsingRegularExpression(i))
+                              ? Colors.blueGrey
+                              : (i == "=")
+                                  ? Colors.blue
+                                  : Colors.grey),
+                        ),
+                      ),
+                      label: i,
+                      fontSize: 13.sp,
+                      onPressed: () {
+                        CustomLogger.verboose(i);
+                        setState(
+                          () {
+                            if (_dataToCount == "0") {
+                              if (CalcUtils.isNumericUsingRegularExpression(
+                                  i)) {
+                                _dataToCount = i;
+                              } else {
+                                CustomLogger.warning(
+                                  "angka di harus awal, gak boleh operator",
+                                );
+                                CalcUtils.showSnackbar(
+                                  context,
+                                  "dont put operators as the first character!",
+                                );
+                              }
+                            } else if (i == "Del") {
+                              _dataToCount =
+                                  CalcUtils.removeLastCharacter(_dataToCount);
+                            } else if (i == "CE") {
+                              _dataToCount = "0";
+                              _result = "0";
+                            } else if (i == "=") {
+                              if (CalcUtils.checkIfLastCharacterIsOperator(
+                                  _dataToCount)) {
+                                CustomLogger.warning(
+                                  "operator di akhir itu invalid",
+                                );
+                                CalcUtils.showSnackbar(
+                                  context,
+                                  "dont put operators as the last character!",
+                                );
+                              } else {
+                                String temp =
+                                    _dataToCount.interpret().toStringAsFixed(2);
+                                _result =
+                                    (CalcUtils.checkIfLastCharacterIsRoundable(
+                                            temp))
+                                        ? temp.substring(0, temp.length - 3)
+                                        : temp;
+                                CustomLogger.info("get result $_result");
+                              }
+                            } else {
+                              _dataToCount += i;
+                            }
+                          },
+                        );
+                      },
+                    )
+                else
+                  for (var i in _list)
+                    CalculatorButtons(
+                      btnStyle: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          ((CalcUtils.isNumericUsingRegularExpression(i))
+                              ? Colors.blueGrey
+                              : (i == "=")
+                                  ? Colors.blue
+                                  : Colors.grey),
+                        ),
+                      ),
+                      label: i,
+                      fontSize: 13.sp,
+                      onPressed: () {
+                        CustomLogger.verboose(i);
+                        setState(
+                          () {
+                            if (_dataToCount == "0") {
+                              if (CalcUtils.isNumericUsingRegularExpression(
+                                  i)) {
+                                _dataToCount = i;
+                              } else {
+                                CustomLogger.warning(
+                                  "angka di harus awal, gak boleh operator",
+                                );
+                                CalcUtils.showSnackbar(
+                                  context,
+                                  "dont put operators as the first character!",
+                                );
+                              }
+                            } else if (i == "Del") {
+                              _dataToCount =
+                                  CalcUtils.removeLastCharacter(_dataToCount);
+                            } else if (i == "CE") {
+                              _dataToCount = "0";
+                              _result = "0";
+                            } else if (i == "=") {
+                              if (CalcUtils.checkIfLastCharacterIsOperator(
+                                  _dataToCount)) {
+                                CustomLogger.warning(
+                                  "operator di akhir itu invalid",
+                                );
+                                CalcUtils.showSnackbar(
+                                  context,
+                                  "dont put operators as the last character!",
+                                );
+                              } else {
+                                String temp =
+                                    _dataToCount.interpret().toStringAsFixed(2);
+                                _result =
+                                    (CalcUtils.checkIfLastCharacterIsRoundable(
+                                            temp))
+                                        ? temp.substring(0, temp.length - 3)
+                                        : temp;
+                                CustomLogger.info("get result $_result");
+                              }
+                            } else {
+                              _dataToCount += i;
+                            }
+                          },
+                        );
+                      },
+                    ),
+              ],
+            ),
+          );
+        },
+      );
+    } else if (Platform.isWindows) {
+      return Scaffold(
+        body: LayoutBuilder(builder: (context, constraint) {
+          return WinViewCalc(
+            result: _result,
+            dataCount: _dataToCount,
+            constraints: constraint,
+            buttons: GridView(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+              ),
+              children: [
+                for (var i in _listLandscape)
+                  Container(
+                    margin: EdgeInsets.all(1.w),
+                    child: CalculatorButtons(
+                      btnStyle: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          ((CalcUtils.isNumericUsingRegularExpression(i))
+                              ? Colors.blueGrey
+                              : (i == "=")
+                                  ? Colors.blue
+                                  : Colors.grey),
+                        ),
+                      ),
+                      label: i,
+                      fontSize: (constraint.maxWidth > 600) ? 10.sp : 12.sp,
+                      onPressed: () {
+                        CustomLogger.verboose(i);
+                        setState(
+                          () {
+                            if (_dataToCount == "0") {
+                              if (CalcUtils.isNumericUsingRegularExpression(
+                                  i)) {
+                                _dataToCount = i;
+                              } else {
+                                CustomLogger.warning(
+                                  "angka di harus awal, gak boleh operator",
+                                );
+                                CalcUtils.showSnackbar(
+                                  context,
+                                  "dont put operators as the first character!",
+                                );
+                              }
+                            } else if (i == "Del") {
+                              _dataToCount =
+                                  CalcUtils.removeLastCharacter(_dataToCount);
+                            } else if (i == "CE") {
+                              _dataToCount = "0";
+                              _result = "0";
+                            } else if (i == "=") {
+                              if (CalcUtils.checkIfLastCharacterIsOperator(
+                                  _dataToCount)) {
+                                CustomLogger.warning(
+                                  "operator di akhir itu invalid",
+                                );
+                                CalcUtils.showSnackbar(
+                                  context,
+                                  "dont put operators as the last character!",
+                                );
+                              } else {
+                                String temp =
+                                    _dataToCount.interpret().toStringAsFixed(2);
+                                _result =
+                                    (CalcUtils.checkIfLastCharacterIsRoundable(
+                                            temp))
+                                        ? temp.substring(0, temp.length - 3)
+                                        : temp;
+                                CustomLogger.info("get result $_result");
+                              }
+                            } else {
+                              _dataToCount += i;
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+      );
+    } else {
+      return const Center(
+        child: Text("Unknown Platform"),
+      );
+    }
   }
 }

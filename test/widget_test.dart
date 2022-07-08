@@ -11,20 +11,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalkulator/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  
+//   testWidgets('Test perkalian', (WidgetTester tester) async {
+//     // setup
+//     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+//     // do
+//     await tester.tap(find.text("8"));
+//     await tester.pump();
+//     await tester.tap(find.text("*"));
+//     await tester.pump();
+//     await tester.tap(find.text("9"));
+//     await tester.pump();
+//     await tester.tap(find.text("="));
+//     await tester.pump();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+//     // expect
+//     expect(find.text('72'), findsOneWidget);
+//   });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-  });
+//   testWidgets('Test penambahan', (WidgetTester tester) async {
+//     // setup
+//     await tester.pumpWidget(const MyApp());
+
+//     // do
+//     await tester.pump();
+//     await tester.tap(find.text("8"));
+//     await tester.pump();
+//     await tester.tap(find.text("+"));
+//     await tester.pump();
+//     await tester.tap(find.text("9"));
+//     await tester.pump();
+//     await tester.tap(find.text("="));
+//     await tester.pump();
+
+//     // expect
+//     expect(find.text('17'), findsOneWidget);
+//   });
 }
