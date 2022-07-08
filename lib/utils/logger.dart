@@ -55,6 +55,31 @@ class CalcUtils {
     ];
   }
 
+  static List<String> getButtonLandscapeLabels() {
+    return [
+      "(",
+      ")",
+      ".",
+      "CE",
+      "Del",
+      "1",
+      "2",
+      "3",
+      "*",
+      "+",
+      "4",
+      "5",
+      "6",
+      "/",
+      "-",
+      "7",
+      "8",
+      "9",
+      "0",
+      "=",
+    ];
+  }
+
   static bool isNumericUsingRegularExpression(String string) {
     final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
     if (string == ".") {
