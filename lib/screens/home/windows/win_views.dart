@@ -4,13 +4,13 @@ import 'package:sizer/sizer.dart';
 
 import '../../widgets/home_widgets.dart';
 
-class WebViewCalc extends StatelessWidget {
+class WinViewCalc extends StatelessWidget {
   final String result;
   final String dataCount;
   final GridView buttons;
   final BoxConstraints constraints;
 
-  const WebViewCalc({
+  const WinViewCalc({
     Key? key,
     required this.result,
     required this.dataCount,
@@ -20,8 +20,10 @@ class WebViewCalc extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (constraints.maxWidth > 600) {
+    if (constraints.maxWidth > 600 && constraints.maxWidth < 1000) {
       return wideCalcView(dataCount, result, buttons);
+    } else if (constraints.maxWidth > 1000) {
+      return ultraWideCalcView();
     } else {
       return narrowCalcView(dataCount, result, buttons);
     }
@@ -61,6 +63,18 @@ Widget narrowCalcView(String dataCount, String result, GridView buttons) {
   );
 }
 
+Widget ultraWideCalcView() {
+  return Center(
+    child: Text(
+      "Ultra Wide mode still under construction",
+      style: GoogleFonts.roboto(
+        fontSize: 30.sp,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+  );
+}
+
 Widget wideCalcView(
   String dataCount,
   String result,
@@ -68,28 +82,28 @@ Widget wideCalcView(
 ) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
-    height: 100.h,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          margin: EdgeInsets.only(right: 2.w),
-          height: 50.h,
-          width: 30.w,
+          padding: EdgeInsets.only(right: 2.w),
+          height: 100.h,
+          width: 60.w,
           child: buttons,
         ),
         Container(
-          margin: EdgeInsets.only(right: 2.w),
-          height: 50.h,
-          width: 30.w,
+          margin: EdgeInsets.only(top: 2.h),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 2.h,
+                      horizontal: 2.w,
+                    ),
                     width: 10.w,
                     color: Colors.amber,
                     child: Text(

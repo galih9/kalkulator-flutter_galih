@@ -23,6 +23,10 @@ class MobileViewCalc extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 HeaderDisplayer(
+                  labelWidth:
+                      (orientation == Orientation.portrait) ? 40.w : 30.w,
+                  valueWidth:
+                      (orientation == Orientation.landscape) ? 41.w : 60.w,
                   orientation: orientation,
                   value: result,
                   color: Colors.amberAccent,
@@ -30,6 +34,10 @@ class MobileViewCalc extends StatelessWidget {
                   label: "result",
                 ),
                 HeaderDisplayer(
+                  labelWidth:
+                      (orientation == Orientation.portrait) ? 40.w : 30.w,
+                  valueWidth:
+                      (orientation == Orientation.landscape) ? 41.w : 60.w,
                   orientation: orientation,
                   value: dataCount,
                   color: Colors.greenAccent,
@@ -65,6 +73,12 @@ class MobileViewCalc extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           HeaderDisplayer(
+                            labelWidth: (orientation == Orientation.portrait)
+                                ? 40.w
+                                : 30.w,
+                            valueWidth: (orientation == Orientation.landscape)
+                                ? 41.w
+                                : 60.w,
                             orientation: orientation,
                             value: result,
                             color: Colors.amberAccent,
@@ -72,6 +86,12 @@ class MobileViewCalc extends StatelessWidget {
                             label: "result",
                           ),
                           HeaderDisplayer(
+                            labelWidth: (orientation == Orientation.portrait)
+                                ? 40.w
+                                : 30.w,
+                            valueWidth: (orientation == Orientation.landscape)
+                                ? 41.w
+                                : 60.w,
                             orientation: orientation,
                             value: dataCount,
                             color: Colors.greenAccent,

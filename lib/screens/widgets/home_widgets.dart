@@ -8,6 +8,8 @@ class HeaderDisplayer extends StatelessWidget {
   final Color colorLabel;
   final String label;
   final Orientation orientation;
+  final double labelWidth;
+  final double valueWidth;
   const HeaderDisplayer({
     Key? key,
     required this.value,
@@ -15,6 +17,8 @@ class HeaderDisplayer extends StatelessWidget {
     required this.colorLabel,
     required this.label,
     required this.orientation,
+    required this.labelWidth,
+    required this.valueWidth,
   }) : super(key: key);
 
   @override
@@ -23,7 +27,7 @@ class HeaderDisplayer extends StatelessWidget {
       children: [
         Container(
           padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
-          width: (orientation == Orientation.portrait) ? 40.w : 30.w,
+          width: labelWidth,
           color: colorLabel,
           child: Text(
             label,
@@ -36,7 +40,7 @@ class HeaderDisplayer extends StatelessWidget {
         Container(
           color: color,
           padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
-          width: (orientation == Orientation.landscape) ? 41.w : 60.w,
+          width: valueWidth,
           child: Text(
             value,
             textAlign: TextAlign.end,
@@ -56,11 +60,13 @@ class CalculatorButtons extends StatelessWidget {
   final void Function() onPressed;
   final String label;
   final ButtonStyle btnStyle;
+  final double fontSize;
   const CalculatorButtons({
     Key? key,
     required this.onPressed,
     required this.label,
     required this.btnStyle,
+    required this.fontSize,
   }) : super(key: key);
 
   @override
@@ -71,7 +77,7 @@ class CalculatorButtons extends StatelessWidget {
       child: Text(
         label,
         style: GoogleFonts.poppins(
-          fontSize: 13.sp,
+          fontSize: fontSize,
           color: Colors.black,
         ),
       ),
