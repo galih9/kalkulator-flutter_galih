@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kalkulator/blocs/bloc/home_bloc.dart';
 import 'package:sizer/sizer.dart';
 
+import 'blocs/home_bloc.dart';
 import 'screens/home/home.dart';
 
 void main() {

@@ -80,8 +80,26 @@ class CalcUtils {
     ];
   }
 
+  static bool isNumericCanBeCalculated(String string) {
+    final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
+    if (string == "(") {
+      return true;
+    }
+    if (string == ".") {
+      return false;
+    }
+    if (string == "-") {
+      return false;
+    }
+
+    return numericRegex.hasMatch(string);
+  }
+
   static bool isNumericUsingRegularExpression(String string) {
     final numericRegex = RegExp(r'^-?(([0-9]*)|(([0-9]*)\.([0-9]*)))$');
+    if (string == "(") {
+      return false;
+    }
     if (string == ".") {
       return false;
     }

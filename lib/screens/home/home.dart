@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:function_tree/function_tree.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kalkulator/screens/home/web/web_view.dart';
 import 'package:kalkulator/screens/home/windows/win_views.dart';
 import 'package:kalkulator/screens/widgets/home_widgets.dart';
 import 'package:kalkulator/utils/logger.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:shimmer/shimmer.dart';
 import 'dart:io' show Platform;
 import 'package:sizer/sizer.dart';
+
+import '../../blocs/home_bloc.dart';
 
 part './mobile/mobile_view.dart';
 
@@ -19,14 +24,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _dataToCount = "0";
-  String _result = "0";
   final List<String> _list = CalcUtils.getButtonLabels();
   final List<String> _listLandscape = CalcUtils.getButtonLandscapeLabels();
 
   @override
   void initState() {
     super.initState();
+    context.read<HomeBloc>().add(LoadData());
   }
 
   @override
@@ -38,10 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if (kIsWeb) {
       return Scaffold(
+        backgroundColor: Colors.grey[300],
         body: LayoutBuilder(builder: (context, constraint) {
           return WebViewCalc(
-            result: _result,
-            dataCount: _dataToCount,
+            result: "",
+            dataCount: "",
             constraints: constraint,
             buttons: GridView(
               physics: const NeverScrollableScrollPhysics(),
@@ -66,53 +71,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       label: i,
                       fontSize: (constraint.maxWidth > 600) ? 3.sp : 12.sp,
                       onPressed: () {
-                        CustomLogger.verboose(i);
-                        setState(
-                          () {
-                            if (_dataToCount == "0") {
-                              if (CalcUtils.isNumericUsingRegularExpression(
-                                  i)) {
-                                _dataToCount = i;
-                              } else {
-                                CustomLogger.warning(
-                                  "angka di harus awal, gak boleh operator",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the first character!",
-                                );
-                              }
-                            } else if (i == "Del") {
-                              _dataToCount =
-                                  CalcUtils.removeLastCharacter(_dataToCount);
-                            } else if (i == "CE") {
-                              _dataToCount = "0";
-                              _result = "0";
-                            } else if (i == "=") {
-                              if (CalcUtils.checkIfLastCharacterIsOperator(
-                                  _dataToCount)) {
-                                CustomLogger.warning(
-                                  "operator di akhir itu invalid",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the last character!",
-                                );
-                              } else {
-                                String temp =
-                                    _dataToCount.interpret().toStringAsFixed(2);
-                                _result =
-                                    (CalcUtils.checkIfLastCharacterIsRoundable(
-                                            temp))
-                                        ? temp.substring(0, temp.length - 3)
-                                        : temp;
-                                CustomLogger.info("get result $_result");
-                              }
-                            } else {
-                              _dataToCount += i;
-                            }
-                          },
-                        );
+                        if (i == "Del") {
+                          context.read<HomeBloc>().add(
+                                DeleteNumber(dataCount: i),
+                              );
+                        } else if (i == "CE") {
+                          context.read<HomeBloc>().add(
+                                const DeleteEverything(),
+                              );
+                        } else if (i == "=") {
+                          context.read<HomeBloc>().add(
+                                const CalculateResult(),
+                              );
+                        } else {
+                          context.read<HomeBloc>().add(
+                                AddNumber(dataCount: i),
+                              );
+                        }
                       },
                     ),
                   ),
@@ -140,156 +115,18 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           return MobileViewCalc(
             orientation: orientation,
-            result: _result,
-            dataCount: _dataToCount,
-            buttons: GridView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: (orientation == Orientation.portrait) ? 4 : 5,
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
-              ),
-              children: [
-                if (orientation == Orientation.landscape)
-                  for (var i in _listLandscape)
-                    CalculatorButtons(
-                      btnStyle: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          ((CalcUtils.isNumericUsingRegularExpression(i))
-                              ? Colors.blueGrey
-                              : (i == "=")
-                                  ? Colors.blue
-                                  : Colors.grey),
-                        ),
-                      ),
-                      label: i,
-                      fontSize: 13.sp,
-                      onPressed: () {
-                        CustomLogger.verboose(i);
-                        setState(
-                          () {
-                            if (_dataToCount == "0") {
-                              if (CalcUtils.isNumericUsingRegularExpression(
-                                  i)) {
-                                _dataToCount = i;
-                              } else {
-                                CustomLogger.warning(
-                                  "angka di harus awal, gak boleh operator",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the first character!",
-                                );
-                              }
-                            } else if (i == "Del") {
-                              _dataToCount =
-                                  CalcUtils.removeLastCharacter(_dataToCount);
-                            } else if (i == "CE") {
-                              _dataToCount = "0";
-                              _result = "0";
-                            } else if (i == "=") {
-                              if (CalcUtils.checkIfLastCharacterIsOperator(
-                                  _dataToCount)) {
-                                CustomLogger.warning(
-                                  "operator di akhir itu invalid",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the last character!",
-                                );
-                              } else {
-                                String temp =
-                                    _dataToCount.interpret().toStringAsFixed(2);
-                                _result =
-                                    (CalcUtils.checkIfLastCharacterIsRoundable(
-                                            temp))
-                                        ? temp.substring(0, temp.length - 3)
-                                        : temp;
-                                CustomLogger.info("get result $_result");
-                              }
-                            } else {
-                              _dataToCount += i;
-                            }
-                          },
-                        );
-                      },
-                    )
-                else
-                  for (var i in _list)
-                    CalculatorButtons(
-                      btnStyle: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          ((CalcUtils.isNumericUsingRegularExpression(i))
-                              ? Colors.blueGrey
-                              : (i == "=")
-                                  ? Colors.blue
-                                  : Colors.grey),
-                        ),
-                      ),
-                      label: i,
-                      fontSize: 13.sp,
-                      onPressed: () {
-                        CustomLogger.verboose(i);
-                        setState(
-                          () {
-                            if (_dataToCount == "0") {
-                              if (CalcUtils.isNumericUsingRegularExpression(
-                                  i)) {
-                                _dataToCount = i;
-                              } else {
-                                CustomLogger.warning(
-                                  "angka di harus awal, gak boleh operator",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the first character!",
-                                );
-                              }
-                            } else if (i == "Del") {
-                              _dataToCount =
-                                  CalcUtils.removeLastCharacter(_dataToCount);
-                            } else if (i == "CE") {
-                              _dataToCount = "0";
-                              _result = "0";
-                            } else if (i == "=") {
-                              if (CalcUtils.checkIfLastCharacterIsOperator(
-                                  _dataToCount)) {
-                                CustomLogger.warning(
-                                  "operator di akhir itu invalid",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the last character!",
-                                );
-                              } else {
-                                String temp =
-                                    _dataToCount.interpret().toStringAsFixed(2);
-                                _result =
-                                    (CalcUtils.checkIfLastCharacterIsRoundable(
-                                            temp))
-                                        ? temp.substring(0, temp.length - 3)
-                                        : temp;
-                                CustomLogger.info("get result $_result");
-                              }
-                            } else {
-                              _dataToCount += i;
-                            }
-                          },
-                        );
-                      },
-                    ),
-              ],
-            ),
+            list: _list,
+            listLandscape: _listLandscape,
           );
         },
       );
     } else if (Platform.isWindows) {
       return Scaffold(
+        backgroundColor: Colors.grey[300],
         body: LayoutBuilder(builder: (context, constraint) {
           return WinViewCalc(
-            result: _result,
-            dataCount: _dataToCount,
+            result: "",
+            dataCount: "",
             constraints: constraint,
             buttons: GridView(
               physics: const NeverScrollableScrollPhysics(),
@@ -314,53 +151,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       label: i,
                       fontSize: (constraint.maxWidth > 600) ? 10.sp : 12.sp,
                       onPressed: () {
-                        CustomLogger.verboose(i);
-                        setState(
-                          () {
-                            if (_dataToCount == "0") {
-                              if (CalcUtils.isNumericUsingRegularExpression(
-                                  i)) {
-                                _dataToCount = i;
-                              } else {
-                                CustomLogger.warning(
-                                  "angka di harus awal, gak boleh operator",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the first character!",
-                                );
-                              }
-                            } else if (i == "Del") {
-                              _dataToCount =
-                                  CalcUtils.removeLastCharacter(_dataToCount);
-                            } else if (i == "CE") {
-                              _dataToCount = "0";
-                              _result = "0";
-                            } else if (i == "=") {
-                              if (CalcUtils.checkIfLastCharacterIsOperator(
-                                  _dataToCount)) {
-                                CustomLogger.warning(
-                                  "operator di akhir itu invalid",
-                                );
-                                CalcUtils.showSnackbar(
-                                  context,
-                                  "dont put operators as the last character!",
-                                );
-                              } else {
-                                String temp =
-                                    _dataToCount.interpret().toStringAsFixed(2);
-                                _result =
-                                    (CalcUtils.checkIfLastCharacterIsRoundable(
-                                            temp))
-                                        ? temp.substring(0, temp.length - 3)
-                                        : temp;
-                                CustomLogger.info("get result $_result");
-                              }
-                            } else {
-                              _dataToCount += i;
-                            }
-                          },
-                        );
+                        if (i == "Del") {
+                          context.read<HomeBloc>().add(
+                                DeleteNumber(dataCount: i),
+                              );
+                        } else if (i == "CE") {
+                          context.read<HomeBloc>().add(
+                                const DeleteEverything(),
+                              );
+                        } else if (i == "=") {
+                          context.read<HomeBloc>().add(
+                                const CalculateResult(),
+                              );
+                        } else {
+                          context.read<HomeBloc>().add(
+                                AddNumber(dataCount: i),
+                              );
+                        }
                       },
                     ),
                   ),
@@ -370,8 +177,11 @@ class _MyHomePageState extends State<MyHomePage> {
         }),
       );
     } else {
-      return const Center(
-        child: Text("Unknown Platform"),
+      return Scaffold(
+        backgroundColor: Colors.grey[300],
+        body: const Center(
+          child: Text("Unknown Platform"),
+        ),
       );
     }
   }

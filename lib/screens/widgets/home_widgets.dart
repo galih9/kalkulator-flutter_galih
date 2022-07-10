@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
 
 class HeaderDisplayer extends StatelessWidget {
@@ -52,6 +53,81 @@ class HeaderDisplayer extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class HeaderLabelView extends StatelessWidget {
+  final double width;
+  final Color color;
+  final String label;
+  const HeaderLabelView({
+    Key? key,
+    required this.width,
+    required this.color,
+    required this.label,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
+      width: width,
+      color: color,
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class ValueLabelView extends StatelessWidget {
+  final double width;
+  final Color color;
+  final String value;
+  final bool isLoading;
+  final Color baseLoadingColor;
+  final Color highlightLoadingColor;
+  const ValueLabelView({
+    Key? key,
+    required this.width,
+    required this.color,
+    required this.isLoading,
+    this.value = "",
+    this.baseLoadingColor = Colors.green,
+    this.highlightLoadingColor = Colors.amber,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
+      width: width,
+      child: isLoading
+          ? Shimmer.fromColors(
+              baseColor: baseLoadingColor,
+              highlightColor: highlightLoadingColor,
+              child: Text("Loading...",
+                  textAlign: TextAlign.end,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                  )))
+          : Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
     );
   }
 }

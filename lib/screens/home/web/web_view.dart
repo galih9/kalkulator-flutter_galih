@@ -22,10 +22,24 @@ class WebViewCalc extends StatelessWidget {
   Widget build(BuildContext context) {
     if (constraints.maxWidth > 600) {
       return wideCalcView(dataCount, result, buttons);
+    } else if (constraints.maxWidth > 1000) {
+      return ultraWideCalcView();
     } else {
       return narrowCalcView(dataCount, result, buttons);
     }
   }
+}
+
+Widget ultraWideCalcView() {
+  return Center(
+    child: Text(
+      "Ultra Wide mode still under construction",
+      style: GoogleFonts.roboto(
+        fontSize: 30.sp,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+  );
 }
 
 Widget narrowCalcView(String dataCount, String result, GridView buttons) {
