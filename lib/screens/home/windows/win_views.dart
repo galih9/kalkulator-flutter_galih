@@ -1,66 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../../blocs/home_bloc.dart';
+import '../../../utils/logger.dart';
 import '../../widgets/home_widgets.dart';
 
 class WinViewCalc extends StatelessWidget {
-  final String result;
-  final String dataCount;
-  final GridView buttons;
-  final BoxConstraints constraints;
+  final List<String> list;
+  final List<String> listLandscape;
 
   const WinViewCalc({
     Key? key,
-    required this.result,
-    required this.dataCount,
-    required this.buttons,
-    required this.constraints,
+    required this.list,
+    required this.listLandscape,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (constraints.maxWidth > 600 && constraints.maxWidth < 1000) {
-      return wideCalcView(dataCount, result, buttons);
-    } else if (constraints.maxWidth > 1000) {
-      return ultraWideCalcView();
-    } else {
-      return narrowCalcView(dataCount, result, buttons);
-    }
-  }
-}
-
-Widget narrowCalcView(String dataCount, String result, GridView buttons) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      HeaderDisplayer(
-        labelWidth: 40.w,
-        valueWidth: 60.w,
-        orientation: Orientation.portrait,
-        value: result,
-        color: Colors.amberAccent,
-        colorLabel: Colors.amber,
-        label: "result",
-      ),
-      HeaderDisplayer(
-        labelWidth: 40.w,
-        valueWidth: 60.w,
-        orientation: Orientation.portrait,
-        value: dataCount,
-        color: Colors.greenAccent,
-        colorLabel: Colors.green,
-        label: "value",
-      ),
-      Container(
-        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 6.h),
-        child: Center(
-          child: buttons,
+    return BlocListener<HomeBloc, HomeState>(
+      listener: (context, state) {
+        if (state is HomeLoaded) {
+          if (state.warningMessage.isNotEmpty) {
+            CalcUtils.showSnackbar(context, state.warningMessage);
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey[300],
+        body: LayoutBuilder(
+          builder: (context, constraint) {
+            if (constraint.maxWidth > 600) {
+              return wideCalcView(context, listLandscape);
+            } else if (constraint.maxWidth > 1000) {
+              return ultraWideCalcView();
+            } else {
+              return narrowCalcView(context, listLandscape);
+            }
+          },
         ),
       ),
-    ],
-  );
+    );
+  }
 }
 
 Widget ultraWideCalcView() {
@@ -75,93 +57,256 @@ Widget ultraWideCalcView() {
   );
 }
 
+Widget narrowCalcView(
+  BuildContext context,
+  List<String> list,
+) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          return Row(
+            children: [
+              HeaderLabelView(
+                label: "result",
+                color: Colors.amber,
+                width: 40.w,
+                paddingVert: 2.h,
+                padingHoriz: 5.w,
+                fontSize: 15.sp,
+              ),
+              if (state is HomeInitial || state is HomeLoadResult)
+                ValueLabelView(
+                  isLoading: true,
+                  color: Colors.amberAccent,
+                  width: 60.w,
+                  fontSize: 15.sp,
+                )
+              else if (state is HomeLoaded)
+                ValueLabelView(
+                  isLoading: false,
+                  color: Colors.amberAccent,
+                  value: state.result,
+                  width: 60.w,
+                  fontSize: 15.sp,
+                ),
+            ],
+          );
+        },
+      ),
+      BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          return Row(
+            children: [
+              HeaderLabelView(
+                label: "value",
+                color: Colors.green,
+                width: 40.w,
+                paddingVert: 2.h,
+                padingHoriz: 5.w,
+                fontSize: 15.sp,
+              ),
+              if (state is HomeInitial || state is HomeLoadResult)
+                ValueLabelView(
+                  isLoading: true,
+                  color: Colors.greenAccent,
+                  width: 60.w,
+                  fontSize: 15.sp,
+                )
+              else if (state is HomeLoaded)
+                ValueLabelView(
+                  isLoading: false,
+                  color: Colors.greenAccent,
+                  value: state.dataCount,
+                  width: 60.w,
+                  fontSize: 15.sp,
+                ),
+            ],
+          );
+        },
+      ),
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 6.h),
+        child: Center(
+          child: GridView(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
+            children: [
+              for (var i in list)
+                CalculatorButtons(
+                  btnStyle: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      ((CalcUtils.isNumericUsingRegularExpression(i))
+                          ? Colors.blueGrey
+                          : (i == "=")
+                              ? Colors.blue
+                              : Colors.grey),
+                    ),
+                  ),
+                  label: i,
+                  fontSize: 13.sp,
+                  onPressed: () {
+                    if (i == "Del") {
+                      context.read<HomeBloc>().add(
+                            DeleteNumber(dataCount: i),
+                          );
+                    } else if (i == "CE") {
+                      context.read<HomeBloc>().add(
+                            const DeleteEverything(),
+                          );
+                    } else if (i == "=") {
+                      context.read<HomeBloc>().add(
+                            const CalculateResult(),
+                          );
+                    } else {
+                      context.read<HomeBloc>().add(
+                            AddNumber(dataCount: i),
+                          );
+                    }
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 Widget wideCalcView(
-  String dataCount,
-  String result,
-  GridView buttons,
+  BuildContext context,
+  List<String> list,
 ) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+    height: 100.h,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: EdgeInsets.only(right: 2.w),
-          height: 100.h,
-          width: 60.w,
-          child: buttons,
+          margin: EdgeInsets.only(right: 2.w),
+          height: 50.h,
+          width: 30.w,
+          child: GridView(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
+            children: [
+              for (var i in list)
+                CalculatorButtons(
+                  btnStyle: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      ((CalcUtils.isNumericUsingRegularExpression(i))
+                          ? Colors.blueGrey
+                          : (i == "=")
+                              ? Colors.blue
+                              : Colors.grey),
+                    ),
+                  ),
+                  label: i,
+                  fontSize: 3.sp,
+                  onPressed: () {
+                    if (i == "Del") {
+                      context.read<HomeBloc>().add(
+                            DeleteNumber(dataCount: i),
+                          );
+                    } else if (i == "CE") {
+                      context.read<HomeBloc>().add(
+                            const DeleteEverything(),
+                          );
+                    } else if (i == "=") {
+                      context.read<HomeBloc>().add(
+                            const CalculateResult(),
+                          );
+                    } else {
+                      context.read<HomeBloc>().add(
+                            AddNumber(dataCount: i),
+                          );
+                    }
+                  },
+                ),
+            ],
+          ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 2.h),
+          margin: EdgeInsets.only(right: 2.w),
+          height: 50.h,
+          width: 30.w,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 2.h,
-                      horizontal: 2.w,
-                    ),
-                    width: 10.w,
-                    color: Colors.amber,
-                    child: Text(
-                      "result",
-                      style: GoogleFonts.poppins(
+              BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  return Row(
+                    children: [
+                      HeaderLabelView(
+                        width: 10.w,
+                        color: Colors.amber,
+                        label: "result",
+                        paddingVert: 2.h,
+                        padingHoriz: 2.w,
                         fontSize: 5.sp,
-                        fontWeight: FontWeight.w600,
                       ),
-                    ),
-                  ),
-                  Container(
-                    color: Colors.amberAccent,
-                    padding:
-                        EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
-                    width: 20.w,
-                    child: Text(
-                      result,
-                      textAlign: TextAlign.end,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        fontSize: 5.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+                      if (state is HomeInitial || state is HomeLoadResult)
+                        ValueLabelView(
+                          isLoading: true,
+                          color: Colors.amberAccent,
+                          width: 20.w,
+                          fontSize: 5.sp,
+                        )
+                      else if (state is HomeLoaded)
+                        ValueLabelView(
+                          isLoading: false,
+                          color: Colors.amberAccent,
+                          width: 20.w,
+                          value: state.result,
+                          fontSize: 5.sp,
+                        ),
+                    ],
+                  );
+                },
               ),
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
-                    width: 10.w,
-                    color: Colors.green,
-                    child: Text(
-                      "value",
-                      style: GoogleFonts.poppins(
+              BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  return Row(
+                    children: [
+                      HeaderLabelView(
+                        width: 10.w,
+                        color: Colors.green,
+                        label: "value",
+                        paddingVert: 2.h,
+                        padingHoriz: 2.w,
                         fontSize: 5.sp,
-                        fontWeight: FontWeight.w600,
                       ),
-                    ),
-                  ),
-                  Container(
-                    color: Colors.greenAccent,
-                    padding:
-                        EdgeInsets.symmetric(vertical: 2.h, horizontal: 5.w),
-                    width: 20.w,
-                    child: Text(
-                      dataCount,
-                      textAlign: TextAlign.end,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        fontSize: 5.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+                      if (state is HomeInitial || state is HomeLoadResult)
+                        ValueLabelView(
+                          isLoading: true,
+                          color: Colors.greenAccent,
+                          width: 20.w,
+                          fontSize: 5.sp,
+                        )
+                      else if (state is HomeLoaded)
+                        ValueLabelView(
+                          isLoading: false,
+                          color: Colors.greenAccent,
+                          width: 20.w,
+                          value: state.dataCount,
+                          fontSize: 5.sp,
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),

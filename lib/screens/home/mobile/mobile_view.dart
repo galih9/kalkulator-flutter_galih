@@ -37,12 +37,16 @@ class MobileViewCalc extends StatelessWidget {
                             label: "result",
                             color: Colors.amber,
                             width: 40.w,
+                            paddingVert: 2.h,
+                            padingHoriz: 5.w,
+                            fontSize: 15.sp,
                           ),
                           if (state is HomeInitial || state is HomeLoadResult)
                             ValueLabelView(
                               isLoading: true,
                               color: Colors.amberAccent,
                               width: 60.w,
+                              fontSize: 15.sp,
                             )
                           else if (state is HomeLoaded)
                             ValueLabelView(
@@ -50,6 +54,7 @@ class MobileViewCalc extends StatelessWidget {
                               color: Colors.amberAccent,
                               value: state.result,
                               width: 60.w,
+                              fontSize: 15.sp,
                             ),
                         ],
                       );
@@ -63,12 +68,16 @@ class MobileViewCalc extends StatelessWidget {
                             label: "value",
                             color: Colors.green,
                             width: 40.w,
+                            paddingVert: 2.h,
+                            padingHoriz: 5.w,
+                            fontSize: 15.sp,
                           ),
                           if (state is HomeInitial || state is HomeLoadResult)
                             ValueLabelView(
                               isLoading: true,
                               color: Colors.greenAccent,
                               width: 60.w,
+                              fontSize: 15.sp,
                             )
                           else if (state is HomeLoaded)
                             ValueLabelView(
@@ -76,6 +85,7 @@ class MobileViewCalc extends StatelessWidget {
                               color: Colors.greenAccent,
                               value: state.dataCount,
                               width: 60.w,
+                              fontSize: 15.sp,
                             ),
                         ],
                       );
@@ -88,9 +98,9 @@ class MobileViewCalc extends StatelessWidget {
                       child: GridView(
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              (orientation == Orientation.portrait) ? 4 : 5,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
                           mainAxisSpacing: 4,
                           crossAxisSpacing: 4,
                         ),
@@ -150,9 +160,8 @@ class MobileViewCalc extends StatelessWidget {
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  (orientation == Orientation.portrait) ? 4 : 5,
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 5,
                               mainAxisSpacing: 4,
                               crossAxisSpacing: 4,
                             ),
@@ -212,6 +221,9 @@ class MobileViewCalc extends StatelessWidget {
                                       label: "result",
                                       color: Colors.amber,
                                       width: 30.w,
+                                      paddingVert: 2.h,
+                                      padingHoriz: 5.w,
+                                      fontSize: 15.sp,
                                     ),
                                     if (state is HomeInitial ||
                                         state is HomeLoadResult)
@@ -219,12 +231,14 @@ class MobileViewCalc extends StatelessWidget {
                                         isLoading: true,
                                         color: Colors.amberAccent,
                                         width: 41.w,
+                                        fontSize: 15.sp,
                                       )
                                     else if (state is HomeLoaded)
                                       ValueLabelView(
                                         isLoading: false,
                                         color: Colors.amberAccent,
                                         width: 41.w,
+                                        fontSize: 15.sp,
                                         value: state.result,
                                       )
                                   ],
@@ -239,6 +253,9 @@ class MobileViewCalc extends StatelessWidget {
                                       label: "value",
                                       color: Colors.green,
                                       width: 30.w,
+                                      paddingVert: 2.h,
+                                      padingHoriz: 5.w,
+                                      fontSize: 15.sp,
                                     ),
                                     if (state is HomeInitial ||
                                         state is HomeLoadResult)
@@ -246,6 +263,7 @@ class MobileViewCalc extends StatelessWidget {
                                         isLoading: true,
                                         color: Colors.greenAccent,
                                         width: 41.w,
+                                        fontSize: 15.sp,
                                       )
                                     else if (state is HomeLoaded)
                                       ValueLabelView(
@@ -253,6 +271,7 @@ class MobileViewCalc extends StatelessWidget {
                                         color: Colors.greenAccent,
                                         width: 41.w,
                                         value: state.dataCount,
+                                        fontSize: 15.sp,
                                       )
                                   ],
                                 );
