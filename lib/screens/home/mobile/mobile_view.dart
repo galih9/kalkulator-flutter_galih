@@ -4,12 +4,16 @@ class MobileViewCalc extends StatelessWidget {
   final Orientation orientation;
   final List<String> list;
   final List<String> listLandscape;
+  final AudioPlayer typePlayer;
+  final AudioPlayer errorPlayer;
 
   const MobileViewCalc({
     Key? key,
     required this.orientation,
     required this.list,
     required this.listLandscape,
+    required this.typePlayer,
+    required this.errorPlayer,
   }) : super(key: key);
 
   @override
@@ -19,6 +23,7 @@ class MobileViewCalc extends StatelessWidget {
         if (state is HomeLoaded) {
           if (state.warningMessage.isNotEmpty) {
             CalcUtils.showSnackbar(context, state.warningMessage);
+            CalcUtils.playAudio(errorPlayer, "e");
           }
         }
       },
@@ -120,6 +125,7 @@ class MobileViewCalc extends StatelessWidget {
                               label: i,
                               fontSize: 13.sp,
                               onPressed: () {
+                                CalcUtils.playAudio(typePlayer, "c");
                                 if (i == "Del") {
                                   context.read<HomeBloc>().add(
                                         DeleteNumber(dataCount: i),
@@ -182,6 +188,7 @@ class MobileViewCalc extends StatelessWidget {
                                   label: i,
                                   fontSize: 13.sp,
                                   onPressed: () {
+                                    CalcUtils.playAudio(typePlayer, "c");
                                     if (i == "Del") {
                                       context.read<HomeBloc>().add(
                                             DeleteNumber(dataCount: i),

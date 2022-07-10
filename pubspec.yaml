@@ -19,6 +19,8 @@ dependencies:
   google_fonts: ^3.0.1
   json_annotation: ^4.5.0
   json_serializable: ^6.2.0
+  just_audio: ^0.9.27
+  just_audio_windows: ^0.1.0
   logger: ^1.1.0
   msix: ^3.6.2
   shimmer: ^2.0.0
@@ -33,3 +35,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/audio/

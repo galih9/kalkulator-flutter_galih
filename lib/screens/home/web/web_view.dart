@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../blocs/home_bloc.dart';
@@ -10,11 +11,15 @@ import '../../widgets/home_widgets.dart';
 class WebViewCalc extends StatelessWidget {
   final List<String> list;
   final List<String> listLandscape;
+  final AudioPlayer typePlayer;
+  final AudioPlayer errorPlayer;
 
   const WebViewCalc({
     Key? key,
     required this.list,
     required this.listLandscape,
+    required this.typePlayer,
+    required this.errorPlayer,
   }) : super(key: key);
 
   @override
@@ -24,6 +29,7 @@ class WebViewCalc extends StatelessWidget {
         if (state is HomeLoaded) {
           if (state.warningMessage.isNotEmpty) {
             CalcUtils.showSnackbar(context, state.warningMessage);
+            CalcUtils.playAudio(errorPlayer, "e");
           }
         }
       },
@@ -32,11 +38,11 @@ class WebViewCalc extends StatelessWidget {
         body: LayoutBuilder(
           builder: (context, constraint) {
             if (constraint.maxWidth > 600) {
-              return wideCalcView(context, listLandscape);
+              return wideCalcView(context, listLandscape, typePlayer);
             } else if (constraint.maxWidth > 1000) {
               return ultraWideCalcView();
             } else {
-              return narrowCalcView(context, listLandscape);
+              return narrowCalcView(context, listLandscape, typePlayer);
             }
           },
         ),
@@ -60,6 +66,7 @@ Widget ultraWideCalcView() {
 Widget narrowCalcView(
   BuildContext context,
   List<String> list,
+  AudioPlayer player,
 ) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
@@ -153,6 +160,7 @@ Widget narrowCalcView(
                   label: i,
                   fontSize: 13.sp,
                   onPressed: () {
+                    CalcUtils.playAudio(player, "c");
                     if (i == "Del") {
                       context.read<HomeBloc>().add(
                             DeleteNumber(dataCount: i),
@@ -183,6 +191,7 @@ Widget narrowCalcView(
 Widget wideCalcView(
   BuildContext context,
   List<String> list,
+  AudioPlayer player,
 ) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
@@ -217,6 +226,7 @@ Widget wideCalcView(
                   label: i,
                   fontSize: 3.sp,
                   onPressed: () {
+                    CalcUtils.playAudio(player, "c");
                     if (i == "Del") {
                       context.read<HomeBloc>().add(
                             DeleteNumber(dataCount: i),

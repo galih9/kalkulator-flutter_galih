@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:sizer/sizer.dart';
 // local library import
 import '../../screens/home/web/web_view.dart';
@@ -25,16 +26,26 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<String> _list = CalcUtils.getButtonLabels();
   final List<String> _listLandscape = CalcUtils.getButtonLandscapeLabels();
+  final _player = AudioPlayer();
+  final _playerClick = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     context.read<HomeBloc>().add(LoadData());
+    configureSound();
   }
 
   @override
   void dispose() {
     super.dispose();
+    _player.dispose();
+    _playerClick.dispose();
+  }
+
+  configureSound() async {
+    _playerClick.setVolume(0.8);
+    _player.setVolume(1);
   }
 
   @override
@@ -43,6 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
       return WebViewCalc(
         list: _list,
         listLandscape: _listLandscape,
+        typePlayer: _player,
+        errorPlayer: _playerClick,
       );
     } else if (Platform.isAndroid) {
       return OrientationBuilder(
@@ -65,6 +78,8 @@ class _MyHomePageState extends State<MyHomePage> {
             orientation: orientation,
             list: _list,
             listLandscape: _listLandscape,
+            typePlayer: _player,
+            errorPlayer: _playerClick,
           );
         },
       );

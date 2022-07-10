@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger(
@@ -173,5 +174,19 @@ class CalcUtils {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  static playAudio(AudioPlayer player, String type) async {
+    if (type == "e") {
+      await player.setAudioSource(
+        AudioSource.uri(Uri.parse('asset:///assets/audio/error.wav')),
+      );
+    }
+    if (type == "c") {
+      await player.setAudioSource(
+        AudioSource.uri(Uri.parse('asset:///assets/audio/type.wav')),
+      );
+    }
+    player.play();
   }
 }
