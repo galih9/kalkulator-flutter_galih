@@ -149,7 +149,7 @@ Widget narrowCalcView(
               for (var i in list)
                 CalculatorButtons(
                   btnStyle: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
+                    backgroundColor: WidgetStateProperty.all(
                       ((CalcUtils.isNumericUsingRegularExpression(i))
                           ? Colors.blueGrey
                           : (i == "=")
@@ -215,7 +215,7 @@ Widget wideCalcView(
               for (var i in list)
                 CalculatorButtons(
                   btnStyle: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
+                    backgroundColor: WidgetStateProperty.all(
                       ((CalcUtils.isNumericUsingRegularExpression(i))
                           ? Colors.blueGrey
                           : (i == "=")
